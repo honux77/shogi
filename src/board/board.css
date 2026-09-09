@@ -1,0 +1,129 @@
+.shogi-board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  width: min(90vw, 480px);
+  height: min(90vw, 480px);
+  background: #dcb35c;
+  border: 3px solid #4a2f13;
+}
+
+.shogi-square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #4a2f13;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.shogi-square.is-selected {
+  background: rgba(255, 214, 0, 0.55);
+}
+
+.shogi-square.is-last-move {
+  background: rgba(120, 180, 255, 0.35);
+}
+
+.shogi-piece {
+  font-size: clamp(18px, 4.5vw, 30px);
+  font-weight: 700;
+  color: #1a1a1a;
+  user-select: none;
+  line-height: 1;
+}
+
+.shogi-piece.piece-gote {
+  transform: rotate(180deg);
+}
+
+.dest-marker {
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: rgba(20, 120, 20, 0.55);
+}
+
+.piece-stand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 44px;
+  align-items: center;
+  padding: 6px 10px;
+  background: #efe3c8;
+  border: 1px solid #4a2f13;
+  width: min(90vw, 480px);
+  box-sizing: border-box;
+}
+
+.piece-stand-gote {
+  justify-content: flex-end;
+}
+
+.piece-stand-empty {
+  color: #8a7a5c;
+}
+
+.stand-piece {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #dcb35c;
+  border: 1px solid #4a2f13;
+  cursor: pointer;
+  padding: 0;
+}
+
+.stand-piece:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.stand-piece.is-selected {
+  background: rgba(255, 214, 0, 0.7);
+}
+
+.promotion-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.promotion-prompt {
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.promotion-prompt-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.stand-count {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 11px;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
