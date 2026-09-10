@@ -2,23 +2,11 @@ import type { Color, SquareName } from 'shogiops/types';
 import type { Position } from 'shogiops/variant/position';
 import { pieceAt } from '../rules/position';
 import { pieceGlyph } from './pieceGlyphs';
+import { RANK_KANJI } from './squareLabel';
 import './board.css';
 
 const FILES_ASCENDING = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 const RANKS_ASCENDING = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'] as const;
-
-/** Traditional kanji numerals used for rank labels alongside the board. */
-const RANK_KANJI: Record<string, string> = {
-  a: '一',
-  b: '二',
-  c: '三',
-  d: '四',
-  e: '五',
-  f: '六',
-  g: '七',
-  h: '八',
-  i: '九',
-};
 
 interface BoardProps {
   pos: Position;
