@@ -1,6 +1,8 @@
-import type { SquareName } from 'shogiops/types';
+import type { Role, SquareName } from 'shogiops/types';
 
-export interface LessonStep {
+/** A step where the learner moves a piece already on the board. */
+export interface MoveLessonStep {
+  kind: 'move';
   /** Instruction shown to the learner for this step. */
   prompt: string;
   /** The single square the learner must select to act from. */
@@ -10,6 +12,19 @@ export interface LessonStep {
   /** Shown once the step is completed. */
   successMessage: string;
 }
+
+/** A step where the learner drops a piece from their hand onto the board. */
+export interface DropLessonStep {
+  kind: 'drop';
+  prompt: string;
+  /** The hand piece the learner must select (always sente in lessons). */
+  role: Role;
+  /** Any of these destinations completes the step. */
+  targets: SquareName[];
+  successMessage: string;
+}
+
+export type LessonStep = MoveLessonStep | DropLessonStep;
 
 export interface Lesson {
   id: string;

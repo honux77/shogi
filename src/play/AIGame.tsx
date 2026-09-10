@@ -9,6 +9,7 @@ import {
   applyDrop,
   applyMove,
   createInitialPosition,
+  describeUsiMove,
   legalDropDestsFor,
   legalMoveDestsFrom,
   pieceAt,
@@ -36,7 +37,10 @@ export function AIGame() {
   const [humanColor, setHumanColor] = useState<Color>('sente');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
 
-  const [pos, setPos] = useState<Position>(() => createInitialPosition());
+  // `positions[0]` is the game's start; `positions[i]` is the position after the i-th played move
+  // (so `history[i-1]`/`positions[i-1]` is the move/position-before for `positions[i]`). Keeping
+  // every snapshot (instead of just the current one) is what makes 무르기(undo) straightforward.
+  const [positions, setPositions] = useState<Position[]>(() => [createInitialPosition()]);
   const [history, setHistory] = useState<string[]>([]);
   const [selection, setSelection] = useState<Selection>(null);
   const [legalDests, setLegalDests] = useState<SquareName[]>([]);
@@ -46,9 +50,12 @@ export function AIGame() {
   const [resignedColor, setResignedColor] = useState<Color | null>(null);
 
   const opponentRef = useRef<AiOpponent | null>(null);
+  const pos = positions[positions.length - 1];
   const aiColor: Color = humanColor === 'sente' ? 'gote' : 'sente';
   const outcome = pos.outcome();
   const gameOver = outcome != null || resignedColor != null;
+  const canAct = !gameOver && !pendingPromotion && !aiThinking && pos.turn === humanColor;
+  const canUndo = canAct && positions.length > 1;
 
   useEffect(() => {
     return () => opponentRef.current?.terminate();
@@ -73,7 +80,7 @@ export function AIGame() {
       }
       const next = pos.clone();
       playUsi(next, usiMove);
-      setPos(next);
+      setPositions((ps) => [...ps, next]);
       setHistory((h) => [...h, usiMove]);
       setLastMoveSquares(usiToSquareNames(usiMove));
       setSelection(null);
@@ -93,7 +100,7 @@ export function AIGame() {
   function commitMove(from: SquareName, to: SquareName, promote: boolean) {
     const next = pos.clone();
     const usi = applyMove(next, from, to, promote);
-    setPos(next);
+    setPositions((ps) => [...ps, next]);
     setHistory((h) => [...h, usi]);
     setLastMoveSquares([from, to]);
     clearSelection();
@@ -103,14 +110,14 @@ export function AIGame() {
   function commitDrop(role: Role, to: SquareName) {
     const next = pos.clone();
     const usi = applyDrop(next, role, to);
-    setPos(next);
+    setPositions((ps) => [...ps, next]);
     setHistory((h) => [...h, usi]);
     setLastMoveSquares([to]);
     clearSelection();
   }
 
   function handleSquareClick(square: SquareName) {
-    if (gameOver || pendingPromotion || aiThinking || pos.turn !== humanColor) return;
+    if (!canAct) return;
 
     if (selection?.kind === 'square' && legalDests.includes(square)) {
       const choice = promotionChoice(pos, selection.square, square);
@@ -135,15 +142,28 @@ export function AIGame() {
   }
 
   function handleHandPieceClick(color: Color, role: Role) {
-    if (gameOver || pendingPromotion || aiThinking || color !== humanColor || pos.turn !== humanColor) return;
+    if (!canAct || color !== humanColor) return;
     setSelection({ kind: 'drop', color, role });
     setLegalDests(legalDropDestsFor(pos, color, role));
+  }
+
+  function handleUndo() {
+    if (!canUndo) return;
+    // Step back over the AI's reply, then one more ply for the human move that preceded it.
+    let n = positions.length - 1;
+    while (n > 0 && positions[n - 1].turn === aiColor) n--;
+    if (n > 0) n--;
+    const newHistory = history.slice(0, n);
+    setPositions(positions.slice(0, n + 1));
+    setHistory(newHistory);
+    setLastMoveSquares(newHistory.length > 0 ? usiToSquareNames(newHistory[newHistory.length - 1]) : []);
+    clearSelection();
   }
 
   function handleStart() {
     opponentRef.current?.terminate();
     opponentRef.current = createAiOpponent(difficulty);
-    setPos(createInitialPosition());
+    setPositions([createInitialPosition()]);
     setHistory([]);
     clearSelection();
     setLastMoveSquares([]);
@@ -198,50 +218,57 @@ export function AIGame() {
   }
 
   return (
-    <div className="local-game">
-      <PieceStand
-        pos={pos}
-        color={aiColor}
-        canSelect={false}
-        onRoleClick={() => {}}
-        orientation={humanColor}
-      />
+    <div className="ai-game">
+      <div className="ai-game-board">
+        <PieceStand pos={pos} color={aiColor} canSelect={false} onRoleClick={() => {}} orientation={humanColor} />
 
-      <Board
-        pos={pos}
-        selectedSquare={selection?.kind === 'square' ? selection.square : undefined}
-        legalDests={legalDests}
-        lastMoveSquares={lastMoveSquares}
-        onSquareClick={handleSquareClick}
-        orientation={humanColor}
-      />
+        <Board
+          pos={pos}
+          selectedSquare={selection?.kind === 'square' ? selection.square : undefined}
+          legalDests={legalDests}
+          lastMoveSquares={lastMoveSquares}
+          onSquareClick={handleSquareClick}
+          orientation={humanColor}
+        />
 
-      <PieceStand
-        pos={pos}
-        color={humanColor}
-        selectedRole={selection?.kind === 'drop' ? selection.role : undefined}
-        canSelect={!gameOver && !pendingPromotion && !aiThinking && pos.turn === humanColor}
-        onRoleClick={(role) => handleHandPieceClick(humanColor, role)}
-        orientation={humanColor}
-      />
+        <PieceStand
+          pos={pos}
+          color={humanColor}
+          selectedRole={selection?.kind === 'drop' ? selection.role : undefined}
+          canSelect={canAct}
+          onRoleClick={(role) => handleHandPieceClick(humanColor, role)}
+          orientation={humanColor}
+        />
 
-      <div className="game-status">
-        {resignedColor ? (
-          <p>{COLOR_LABELS[resignedColor]}가 기권했습니다 — {COLOR_LABELS[resignedColor === 'sente' ? 'gote' : 'sente']} 승</p>
-        ) : outcome ? (
-          <p>
-            대국 종료: {RESULT_LABELS[outcome.result] ?? outcome.result}
-            {outcome.winner && ` — ${COLOR_LABELS[outcome.winner]} 승`}
-          </p>
-        ) : aiThinking ? (
-          <p>AI가 생각 중...</p>
-        ) : (
-          <p>{pos.turn === humanColor ? '내 차례' : '상대 차례'}</p>
-        )}
-        <button type="button" onClick={handleBackToSetup}>
-          새 대국
-        </button>
+        <div className="game-status">
+          {resignedColor ? (
+            <p>
+              {COLOR_LABELS[resignedColor]}가 기권했습니다 — {COLOR_LABELS[resignedColor === 'sente' ? 'gote' : 'sente']} 승
+            </p>
+          ) : outcome ? (
+            <p>
+              대국 종료: {RESULT_LABELS[outcome.result] ?? outcome.result}
+              {outcome.winner && ` — ${COLOR_LABELS[outcome.winner]} 승`}
+            </p>
+          ) : aiThinking ? (
+            <p>AI가 생각 중...</p>
+          ) : (
+            <p>{pos.turn === humanColor ? '내 차례' : '상대 차례'}</p>
+          )}
+          <button type="button" onClick={handleUndo} disabled={!canUndo}>
+            무르기
+          </button>
+          <button type="button" onClick={handleBackToSetup}>
+            새 대국
+          </button>
+        </div>
       </div>
+
+      <ol className="kifu-list" aria-label="기보">
+        {history.map((usi, i) => (
+          <li key={i}>{describeUsiMove(positions[i], usi)}</li>
+        ))}
+      </ol>
 
       {pendingPromotion && (
         <PromotionPrompt onChoose={(promote) => commitMove(pendingPromotion.from, pendingPromotion.to, promote)} />

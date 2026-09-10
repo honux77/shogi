@@ -1,10 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { parseSfen } from 'shogiops/sfen';
-import type { SquareName } from 'shogiops/types';
+import type { Role, SquareName } from 'shogiops/types';
 import type { Position } from 'shogiops/variant/position';
 import { Board } from '../board/Board';
-import { applyMove, legalMoveDestsFrom, promotionChoice, STANDARD_RULES } from '../rules/position';
+import { PieceStand } from '../board/PieceStand';
+import { PromotionPrompt } from '../board/PromotionPrompt';
+import {
+  applyDrop,
+  applyMove,
+  legalDropDestsFor,
+  legalMoveDestsFrom,
+  promotionChoice,
+  STANDARD_RULES,
+} from '../rules/position';
 import { LESSONS } from './lessons';
 import { markLessonCompleted } from './progress';
 
@@ -20,16 +29,18 @@ export function TutorialPlayer() {
   const [loadedLessonId, setLoadedLessonId] = useState(lessonId);
   const [pos, setPos] = useState<Position | null>(() => (lesson ? loadPosition(lesson.initialSfen) : null));
   const [stepIndex, setStepIndex] = useState(0);
-  const [selected, setSelected] = useState<SquareName | null>(null);
+  const [selected, setSelected] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'retry'>('idle');
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: SquareName; to: SquareName } | null>(null);
 
   // Navigating between lesson routes reuses this component instance; reset state to match.
   if (lessonId !== loadedLessonId) {
     setLoadedLessonId(lessonId);
     setPos(lesson ? loadPosition(lesson.initialSfen) : null);
     setStepIndex(0);
-    setSelected(null);
+    setSelected(false);
     setStatus('idle');
+    setPendingPromotion(null);
   }
 
   if (!lesson) {
@@ -45,29 +56,65 @@ export function TutorialPlayer() {
 
   const step = lesson.steps[stepIndex];
   const isLastStep = stepIndex === lesson.steps.length - 1;
-  const legalDests = status === 'idle' && selected ? legalMoveDestsFrom(pos, selected) : [];
+  const canAct = status === 'idle' && !pendingPromotion;
+  const legalDests =
+    canAct && selected
+      ? step.kind === 'move'
+        ? legalMoveDestsFrom(pos, step.from)
+        : legalDropDestsFor(pos, 'sente', step.role)
+      : [];
+
+  function finishAction(reachedSquare: SquareName) {
+    setSelected(false);
+    setStatus(step.targets.includes(reachedSquare) ? 'success' : 'retry');
+  }
 
   function resetStep() {
     if (!lesson) return;
     setPos(loadPosition(lesson.initialSfen));
-    setSelected(null);
+    setSelected(false);
     setStatus('idle');
+    setPendingPromotion(null);
+  }
+
+  function commitMove(from: SquareName, to: SquareName, promote: boolean) {
+    if (!pos) return;
+    const next = pos.clone();
+    applyMove(next, from, to, promote);
+    setPos(next);
+    setPendingPromotion(null);
+    finishAction(to);
+  }
+
+  function commitDrop(role: Role, to: SquareName) {
+    if (!pos) return;
+    const next = pos.clone();
+    applyDrop(next, role, to);
+    setPos(next);
+    finishAction(to);
   }
 
   function handleSquareClick(square: SquareName) {
-    if (status !== 'idle' || !pos) return;
+    if (!canAct || !pos) return;
 
     if (selected && legalDests.includes(square)) {
-      const choice = promotionChoice(pos, selected, square);
-      const next = pos.clone();
-      applyMove(next, selected, square, choice === 'forced');
-      setPos(next);
-      setSelected(null);
-      setStatus(step.targets.includes(square) ? 'success' : 'retry');
+      if (step.kind === 'move') {
+        const choice = promotionChoice(pos, step.from, square);
+        if (choice === 'forced') commitMove(step.from, square, true);
+        else if (choice === 'optional') setPendingPromotion({ from: step.from, to: square });
+        else commitMove(step.from, square, false);
+      } else {
+        commitDrop(step.role, square);
+      }
       return;
     }
 
-    setSelected(square === step.from ? square : null);
+    setSelected(step.kind === 'move' && square === step.from);
+  }
+
+  function handleHandPieceClick(role: Role) {
+    if (!canAct || step.kind !== 'drop' || role !== step.role) return;
+    setSelected(true);
   }
 
   function handleNext() {
@@ -76,9 +123,9 @@ export function TutorialPlayer() {
       markLessonCompleted(lesson.id);
       navigate('/tutorial');
     } else {
+      // A later step continues from wherever the previous step's move/drop left the position.
       setStepIndex((i) => i + 1);
-      setPos(loadPosition(lesson.initialSfen));
-      setSelected(null);
+      setSelected(false);
       setStatus('idle');
     }
   }
@@ -89,7 +136,15 @@ export function TutorialPlayer() {
       <p className="tutorial-summary">{lesson.summary}</p>
       <p className="tutorial-prompt">{step.prompt}</p>
 
-      <Board pos={pos} selectedSquare={selected ?? undefined} legalDests={legalDests} onSquareClick={handleSquareClick} />
+      <Board pos={pos} selectedSquare={step.kind === 'move' && selected ? step.from : undefined} legalDests={legalDests} onSquareClick={handleSquareClick} />
+
+      <PieceStand
+        pos={pos}
+        color="sente"
+        selectedRole={step.kind === 'drop' && selected ? step.role : undefined}
+        canSelect={canAct && step.kind === 'drop'}
+        onRoleClick={handleHandPieceClick}
+      />
 
       <div className="tutorial-feedback">
         {status === 'success' && (
@@ -109,6 +164,10 @@ export function TutorialPlayer() {
           </>
         )}
       </div>
+
+      {pendingPromotion && (
+        <PromotionPrompt onChoose={(promote) => commitMove(pendingPromotion.from, pendingPromotion.to, promote)} />
+      )}
 
       <Link to="/tutorial">레슨 목록으로</Link>
     </div>

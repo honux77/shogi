@@ -1,4 +1,5 @@
 import { shogigroundDropDests, shogigroundMoveDests } from 'shogiops/compat';
+import { makeJapaneseMoveOrDrop } from 'shogiops/notation/japanese';
 import { initialSfen, makeSfen, parseSfen } from 'shogiops/sfen';
 import type { Color, Piece, Role, Rules, SquareName } from 'shogiops/types';
 import { makeUsi, parseSquareName, parseUsi } from 'shogiops/util';
@@ -70,6 +71,13 @@ export function applyDrop(pos: Position, role: Role, to: SquareName): string {
   if (!pos.isLegal(move)) throw new Error(`Illegal drop: ${role}*${to}`);
   pos.play(move);
   return makeUsi(move);
+}
+
+/** Traditional Japanese notation (e.g. "７六歩") for `usi`, given the position *before* it was played. */
+export function describeUsiMove(posBefore: Position, usi: string): string {
+  const move = parseUsi(usi);
+  if (!move) return usi;
+  return makeJapaneseMoveOrDrop(posBefore, move) ?? usi;
 }
 
 export function playUsi(pos: Position, usi: string): void {

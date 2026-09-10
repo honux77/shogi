@@ -113,3 +113,44 @@
   align-items: center;
   gap: 6px;
 }
+
+.ai-game {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+
+.ai-game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.kifu-list {
+  list-style: decimal;
+  margin: 0;
+  padding: 8px 8px 8px 28px;
+  width: 160px;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .ai-game {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .kifu-list {
+    width: min(90vw, 480px);
+    max-height: 140px;
+    box-sizing: border-box;
+  }
+}
