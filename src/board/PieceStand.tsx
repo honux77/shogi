@@ -30,7 +30,7 @@ export function PieceStand({ pos, color, selectedRole, canSelect, onRoleClick, o
           disabled={!canSelect}
           onClick={() => onRoleClick(role)}
         >
-          <span className={`shogi-piece${color !== orientation ? ' piece-flipped' : ''}`}>{pieceGlyph(color, role)}</span>
+          <span className={`koma koma-small${color !== orientation ? ' koma-flipped' : ''}`}>{pieceGlyph(color, role)}</span>
           {count > 1 && <span className="stand-count">{count}</span>}
         </button>
       ))}
