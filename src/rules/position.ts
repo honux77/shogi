@@ -1,7 +1,7 @@
 import { shogigroundDropDests, shogigroundMoveDests } from 'shogiops/compat';
 import { initialSfen, makeSfen, parseSfen } from 'shogiops/sfen';
 import type { Color, Piece, Role, Rules, SquareName } from 'shogiops/types';
-import { parseSquareName, parseUsi } from 'shogiops/util';
+import { makeUsi, parseSquareName, parseUsi } from 'shogiops/util';
 import type { Position } from 'shogiops/variant/position';
 import { dimensions, handRoles, pieceCanPromote, pieceForcePromote } from 'shogiops/variant/util';
 
@@ -56,18 +56,20 @@ export function promotionChoice(pos: Position, from: SquareName, to: SquareName)
   return 'none';
 }
 
-/** Plays a normal (board-to-board) move, mutating `pos`. */
-export function applyMove(pos: Position, from: SquareName, to: SquareName, promotion: boolean): void {
+/** Plays a normal (board-to-board) move, mutating `pos`. Returns its USI notation. */
+export function applyMove(pos: Position, from: SquareName, to: SquareName, promotion: boolean): string {
   const move = { from: parseSquareName(from), to: parseSquareName(to), promotion };
   if (!pos.isLegal(move)) throw new Error(`Illegal move: ${from}${to}${promotion ? '+' : ''}`);
   pos.play(move);
+  return makeUsi(move);
 }
 
-/** Plays a drop-from-hand move, mutating `pos`. */
-export function applyDrop(pos: Position, role: Role, to: SquareName): void {
+/** Plays a drop-from-hand move, mutating `pos`. Returns its USI notation. */
+export function applyDrop(pos: Position, role: Role, to: SquareName): string {
   const move = { role, to: parseSquareName(to) };
   if (!pos.isLegal(move)) throw new Error(`Illegal drop: ${role}*${to}`);
   pos.play(move);
+  return makeUsi(move);
 }
 
 export function playUsi(pos: Position, usi: string): void {

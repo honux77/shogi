@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { LocalGame } from './game/LocalGame';
 import { Home } from './Home';
+import { AIGame } from './play/AIGame';
 import { TutorialHome } from './tutorial/TutorialHome';
 import { TutorialPlayer } from './tutorial/TutorialPlayer';
 import './App.css';
@@ -14,7 +15,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tutorial" element={<TutorialHome />} />
           <Route path="/tutorial/:lessonId" element={<TutorialPlayer />} />
-          <Route path="/play" element={<LocalGame />} />
+          <Route path="/play/ai" element={<AIGame />} />
+          <Route path="/play/local" element={<LocalGame />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -10,9 +10,11 @@ interface PieceStandProps {
   selectedRole?: Role;
   canSelect: boolean;
   onRoleClick: (role: Role) => void;
+  /** Matches Board's orientation so hand pieces aren't shown upside-down for the viewer. Defaults to sente. */
+  orientation?: Color;
 }
 
-export function PieceStand({ pos, color, selectedRole, canSelect, onRoleClick }: PieceStandProps) {
+export function PieceStand({ pos, color, selectedRole, canSelect, onRoleClick, orientation = 'sente' }: PieceStandProps) {
   const heldRoles = HAND_ROLES.map((role) => ({ role, count: handCount(pos, color, role) })).filter(
     ({ count }) => count > 0,
   );
@@ -28,7 +30,7 @@ export function PieceStand({ pos, color, selectedRole, canSelect, onRoleClick }:
           disabled={!canSelect}
           onClick={() => onRoleClick(role)}
         >
-          <span className={`shogi-piece piece-${color}`}>{pieceGlyph(color, role)}</span>
+          <span className={`shogi-piece${color !== orientation ? ' piece-flipped' : ''}`}>{pieceGlyph(color, role)}</span>
           {count > 1 && <span className="stand-count">{count}</span>}
         </button>
       ))}

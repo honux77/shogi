@@ -6,8 +6,11 @@ export function Home() {
       <Link to="/tutorial" className="home-menu-item">
         단계별 룰 학습
       </Link>
-      <Link to="/play" className="home-menu-item">
-        대국 연습 (2인 로컬)
+      <Link to="/play/ai" className="home-menu-item">
+        AI와 대국
+      </Link>
+      <Link to="/play/local" className="home-menu-item home-menu-item-secondary">
+        2인 로컬 연습
       </Link>
     </nav>
   );
