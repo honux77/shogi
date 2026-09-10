@@ -32,10 +32,16 @@
   padding: 14px;
   text-align: center;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--surface-alt);
   text-decoration: none;
   color: var(--text-h);
   font-size: 18px;
+  transition: border-color 0.15s ease;
+}
+
+.home-menu-item:hover {
+  border-color: var(--primary);
 }
 
 .tutorial-home,
@@ -60,9 +66,15 @@
   display: block;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--surface-alt);
   text-decoration: none;
   color: var(--text-h);
+  transition: border-color 0.15s ease;
+}
+
+.lesson-list a:hover {
+  border-color: var(--primary);
 }
 
 .tutorial-summary {
@@ -82,7 +94,13 @@
 }
 
 .tutorial-success {
-  color: #1a7a2e;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.game-result {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .home-menu-item-secondary {
@@ -105,7 +123,14 @@
   flex-direction: column;
   gap: 6px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+
+.ai-game-setup legend {
+  color: var(--primary);
+  font-weight: 600;
+  padding: 0 6px;
 }
 
 .ai-game-setup label {
@@ -138,7 +163,8 @@
   max-height: 480px;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--surface-alt);
   font-size: 14px;
 }
 

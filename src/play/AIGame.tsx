@@ -210,7 +210,7 @@ export function AIGame() {
             </label>
           ))}
         </fieldset>
-        <button type="button" onClick={handleStart}>
+        <button type="button" className="btn-accent" onClick={handleStart}>
           대국 시작
         </button>
       </div>
@@ -242,11 +242,11 @@ export function AIGame() {
 
         <div className="game-status">
           {resignedColor ? (
-            <p>
+            <p className="game-result">
               {COLOR_LABELS[resignedColor]}가 기권했습니다 — {COLOR_LABELS[resignedColor === 'sente' ? 'gote' : 'sente']} 승
             </p>
           ) : outcome ? (
-            <p>
+            <p className="game-result">
               대국 종료: {RESULT_LABELS[outcome.result] ?? outcome.result}
               {outcome.winner && ` — ${COLOR_LABELS[outcome.winner]} 승`}
             </p>

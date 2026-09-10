@@ -1,13 +1,16 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --text: #33413c;
+  --text-h: #16352c;
+  --bg: #f6faf8;
+  --border: #dce6e1;
+  --code-bg: #f4f1ea;
+  --surface-alt: #f4f1ea;
+  --primary: #1e5e4b;
+  --primary-light: #2d7d64;
+  --accent: #e06d44;
+  --accent-bg: rgba(224, 109, 68, 0.12);
+  --accent-border: rgba(224, 109, 68, 0.45);
+  --social-bg: rgba(244, 241, 234, 0.6);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
@@ -32,15 +35,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
+    --text: #d7e6e0;
+    --text-h: #f1f8f5;
+    --bg: #101a17;
+    --border: #2b3b36;
+    --code-bg: #1b2622;
+    --surface-alt: #1b2622;
+    --primary: #4fae8d;
+    --primary-light: #6cc7a5;
+    --accent: #ff8f66;
+    --accent-bg: rgba(255, 143, 102, 0.16);
+    --accent-border: rgba(255, 143, 102, 0.5);
+    --social-bg: rgba(27, 38, 34, 0.6);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
@@ -108,4 +114,40 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:not(.shogi-square, .stand-piece) {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--text-h);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:not(.shogi-square, .stand-piece):hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+button:not(.shogi-square, .stand-piece):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button.btn-accent:hover:not(:disabled) {
+  filter: brightness(1.06);
 }

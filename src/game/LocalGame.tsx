@@ -124,7 +124,7 @@ export function LocalGame() {
 
       <div className="game-status">
         {outcome ? (
-          <p>
+          <p className="game-result">
             대국 종료: {RESULT_LABELS[outcome.result] ?? outcome.result}
             {outcome.winner && ` — ${COLOR_LABELS[outcome.winner]} 승`}
           </p>

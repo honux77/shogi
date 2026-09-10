@@ -150,7 +150,7 @@ export function TutorialPlayer() {
         {status === 'success' && (
           <>
             <p className="tutorial-success">{step.successMessage}</p>
-            <button type="button" onClick={handleNext}>
+            <button type="button" className="btn-accent" onClick={handleNext}>
               {isLastStep ? '레슨 완료' : '다음 단계'}
             </button>
           </>

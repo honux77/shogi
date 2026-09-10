@@ -62,11 +62,11 @@
 }
 
 .shogi-square.is-selected {
-  background: rgba(255, 214, 0, 0.55);
+  background: rgba(224, 109, 68, 0.4);
 }
 
 .shogi-square.is-last-move {
-  background: rgba(120, 180, 255, 0.35);
+  background: rgba(30, 94, 75, 0.28);
 }
 
 /* Pentagon shogi piece ("koma"): flat bottom, tapering to a point at top. */
@@ -103,7 +103,7 @@
   width: 28%;
   height: 28%;
   border-radius: 50%;
-  background: rgba(20, 120, 20, 0.55);
+  background: rgba(30, 94, 75, 0.55);
 }
 
 .piece-stand {
@@ -160,9 +160,11 @@
 }
 
 .promotion-prompt {
-  background: #fff;
+  background: var(--surface-alt);
+  color: var(--text-h);
   padding: 20px 24px;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
   text-align: center;
 }
 
