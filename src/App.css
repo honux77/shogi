@@ -32,8 +32,9 @@
   padding: 14px;
   text-align: center;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-alt);
+  border-radius: 16px;
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-elevated);
   text-decoration: none;
   color: var(--text-h);
   font-size: 18px;
@@ -42,6 +43,14 @@
 
 .home-menu-item:hover {
   border-color: var(--primary);
+}
+
+.home-menu-item-secondary {
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  box-shadow: none;
+  border-style: dashed;
 }
 
 .tutorial-home,
@@ -66,8 +75,9 @@
   display: block;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-alt);
+  border-radius: 16px;
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-elevated);
   text-decoration: none;
   color: var(--text-h);
   transition: border-color 0.15s ease;
@@ -101,12 +111,6 @@
 .game-result {
   color: var(--accent);
   font-weight: 600;
-}
-
-.home-menu-item-secondary {
-  font-size: 15px;
-  color: var(--text);
-  border-style: dashed;
 }
 
 .ai-game-setup {

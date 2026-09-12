@@ -1,12 +1,20 @@
 import type { Color, SquareName } from 'shogiops/types';
 import type { Position } from 'shogiops/variant/position';
 import { pieceAt } from '../rules/position';
-import { pieceGlyph } from './pieceGlyphs';
+import { isPromotedRole, pieceGlyph } from './pieceGlyphs';
 import { RANK_KANJI } from './squareLabel';
 import './board.css';
 
 const FILES_ASCENDING = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 const RANKS_ASCENDING = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'] as const;
+
+/** Decorative hoshi dots at the board's two-thirds intersections, echoing a Go board's star points. */
+const HOSHI_POSITIONS = [
+  { left: '33.33%', top: '33.33%' },
+  { left: '66.67%', top: '33.33%' },
+  { left: '33.33%', top: '66.67%' },
+  { left: '66.67%', top: '66.67%' },
+];
 
 interface BoardProps {
   pos: Position;
@@ -40,12 +48,16 @@ export function Board({
       </div>
       <div className="shogi-board-row">
         <div className="shogi-board" role="grid" aria-label="쇼기 보드">
+          {HOSHI_POSITIONS.map((p) => (
+            <span key={`${p.left}-${p.top}`} className="hoshi" style={{ left: p.left, top: p.top }} />
+          ))}
           {ranks.map((rank) =>
             files.map((file) => {
               const square = `${file}${rank}` as SquareName;
               const piece = pieceAt(pos, square);
               const isSelected = square === selectedSquare;
               const isLegalDest = legalSet.has(square);
+              const isCaptureDest = isLegalDest && !!piece;
               const isLastMove = lastMoveSet.has(square);
 
               return (
@@ -55,7 +67,7 @@ export function Board({
                   className={[
                     'shogi-square',
                     isSelected && 'is-selected',
-                    isLegalDest && 'is-legal-dest',
+                    isCaptureDest && 'is-capture-dest',
                     isLastMove && 'is-last-move',
                   ]
                     .filter(Boolean)
@@ -64,7 +76,15 @@ export function Board({
                   aria-label={`${square}${piece ? ` ${piece.color} ${piece.role}` : ''}`}
                 >
                   {piece && (
-                    <span className={`koma${piece.color !== orientation ? ' koma-flipped' : ''}`}>
+                    <span
+                      className={[
+                        'koma',
+                        piece.color !== orientation && 'koma-flipped',
+                        isPromotedRole(piece.role) && 'koma-promoted',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
                       {pieceGlyph(piece.color, piece.role)}
                     </span>
                   )}

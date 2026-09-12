@@ -23,3 +23,17 @@ export function pieceGlyph(color: Color, role: Role): string {
   if (role === 'king' && color === 'sente') return '王';
   return ROLE_GLYPHS[role] ?? role;
 }
+
+const PROMOTED_ROLES = new Set<Role>([
+  'tokin',
+  'promotedlance',
+  'promotedsilver',
+  'promotedknight',
+  'horse',
+  'dragon',
+]);
+
+/** Whether `role` is a promoted piece (used to color its glyph as cinnabar coral). */
+export function isPromotedRole(role: Role): boolean {
+  return PROMOTED_ROLES.has(role);
+}
